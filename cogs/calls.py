@@ -1,7 +1,7 @@
 import disnake.errors
 from disnake.ext import commands, tasks
 from disnake import Member, VoiceState, Option, OptionType
-from src.config import channel_for_system_ping_id, channel_for_system_call_id
+from config import channel_for_system_ping_id, channel_for_system_call_id
 
 
 class Calls(commands.Cog):

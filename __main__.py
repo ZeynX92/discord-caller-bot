@@ -15,7 +15,7 @@ async def on_ready():
     print(f"Загружаю коги...")
     print("---------------")
 
-    for name in os.listdir('./src/cogs'):
+    for name in os.listdir('./cogs'):
         if name.endswith('.py'):
             bot.load_extension(f'cogs.{name[:-3]}')
             print(f'Ког {name} был загружен.')
