@@ -57,7 +57,7 @@ class Calls(commands.Cog):
                 embed = disnake.Embed(title='',
                                       color=disnake.Colour.from_rgb(150, 150, 150))
                 embed.set_author(name=r"МИНЕРВА - ПОДФУНКЦИЯ СВЯЗИ:",
-                                 icon_url=config.Minerva_icon)
+                                 icon_url=config.minerva_icon)
                 embed.add_field(name='', value='```Получен запрос подфункции "Минерва"...```', inline=False)
                 embed.add_field(name='', value='```Инициализация запрашиваемой подфункции...```', inline=False)
                 embed.add_field(name='', value='```Подключение...```', inline=False)
@@ -69,7 +69,7 @@ class Calls(commands.Cog):
                 embed.add_field(name='', value=f"⠀⠀⠀⠀⠀⠀⠀{member.mention} начал звонок!", inline=False)
                 embed.set_image(url=member.avatar.url)
                 embed.set_footer(text='МИНЕРВА: Сигнал отправлен всем присутствующим.',
-                                 icon_url=config.Minerva_icon)
+                                 icon_url=config.minerva_icon)
                 await self.bot.get_channel(channel_for_system_ping_id).send(embed=embed,
                                                                             view=ButtonsView(self))
 
