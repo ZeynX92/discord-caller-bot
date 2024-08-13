@@ -1,6 +1,8 @@
 import disnake.errors
 from disnake.ext import commands, tasks
 from disnake import Member, VoiceState, Option, OptionType
+
+import config
 from config import channel_for_system_ping_id, channel_for_system_call_id
 
 
@@ -55,7 +57,7 @@ class Calls(commands.Cog):
                 embed = disnake.Embed(title='',
                                       color=disnake.Colour.from_rgb(150, 150, 150))
                 embed.set_author(name=r"МИНЕРВА - ПОДФУНКЦИЯ СВЯЗИ:",
-                                 icon_url='https://cdn.discordapp.com/attachments/1272710244765798410/1272713108535640076/photo_2024-08-02_16-29-39_Copy.jpg?ex=66bbf9f2&is=66baa872&hm=ae796aa2d177014f974cc757d6bf2938f5e4df0a343ae0e27554e112f6909cd8&')
+                                 icon_url=config.Minerva_icon)
                 embed.add_field(name='', value='```Получен запрос подфункции "Минерва"...```', inline=False)
                 embed.add_field(name='', value='```Инициализация запрашиваемой функции...```', inline=False)
                 embed.add_field(name='', value='```Подключение...```', inline=False)
@@ -67,7 +69,7 @@ class Calls(commands.Cog):
                 embed.add_field(name='', value=f"⠀⠀⠀⠀⠀⠀⠀{member.mention} начал звонок!", inline=False)
                 embed.set_image(url=member.avatar.url)
                 embed.set_footer(text='МИНЕРВА: Сигнал отправлен всем присутствующим.',
-                                 icon_url='https://cdn.discordapp.com/attachments/1272710244765798410/1272713108535640076/photo_2024-08-02_16-29-39_Copy.jpg?ex=66bbf9f2&is=66baa872&hm=ae796aa2d177014f974cc757d6bf2938f5e4df0a343ae0e27554e112f6909cd8&')
+                                 icon_url=config.Minerva_icon)
                 await self.bot.get_channel(channel_for_system_ping_id).send(embed=embed,
                                                                             view=ButtonsView(self))
 
