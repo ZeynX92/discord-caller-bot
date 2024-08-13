@@ -9,7 +9,7 @@ token = os.getenv("BOT_TOKEN")
 test_guilds = [1228301704340967454]
 devs = [834650370315780126, 735403901020536912, 649269897674883076]
 
-if debug == True:
+if debug:
     channel_for_system_ping_id = 1272671680686198846
     channel_for_system_call_id = 1228301704340967459
 else:
