@@ -7,7 +7,7 @@ from disnake.flags import Intents
 if config.debug:
     bot = commands.Bot(command_prefix="!", test_guilds=config.test_guilds, intents=Intents.all())
 else:
-    bot = commands.Bot(command_prefix="!", sync_commands_debug=True, intents=Intents.all())
+    bot = commands.Bot(command_prefix="!", test_guilds=config.test_guilds, intents=Intents.all())
 
 
 @bot.event
