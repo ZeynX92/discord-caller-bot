@@ -59,7 +59,7 @@ class Calls(commands.Cog):
                 embed.set_author(name=r"МИНЕРВА - ПОДФУНКЦИЯ СВЯЗИ:",
                                  icon_url=config.Minerva_icon)
                 embed.add_field(name='', value='```Получен запрос подфункции "Минерва"...```', inline=False)
-                embed.add_field(name='', value='```Инициализация запрашиваемой функции...```', inline=False)
+                embed.add_field(name='', value='```Инициализация запрашиваемой подфункции...```', inline=False)
                 embed.add_field(name='', value='```Подключение...```', inline=False)
                 embed.add_field(name='', value='```Подфункция "Минерва" инициализирована.```', inline=False)
                 embed.add_field(name='', value='', inline=False)
