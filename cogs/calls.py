@@ -3,6 +3,7 @@ from disnake.ext import commands, tasks
 from disnake import Member, VoiceState, Option, OptionType
 import config
 from config import channel_for_system_ping_id, channel_for_system_call_id
+import time
 
 
 class ButtonsView(disnake.ui.View):
@@ -25,6 +26,9 @@ class Calls(commands.Cog):
         self.destination = []
         self.call_in_progress = False
         self.count_decliners = 0
+        self.thread = None
+        self.local_thread = None
+
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
@@ -59,6 +63,8 @@ class Calls(commands.Cog):
                     name="Общий звонок!",
                     auto_archive_duration=60,
                 )
+                self.thread = new_thread
+
                 await self.bot.get_channel(new_thread.id).send("init")
 
                 self.destination = []
@@ -90,6 +96,7 @@ class Calls(commands.Cog):
         if len(self.destination) == 0:
             self.call_in_progress = False
             self.caller.stop()
+            await new_thread.delete()
 
     async def personal_call(self, new_local_thread):
         try:
@@ -102,11 +109,15 @@ class Calls(commands.Cog):
         if len(self.destination) == 0:
             self.call_in_progress = False
             self.caller.stop()
+            await new_local_thread.delete()
 
     @caller.after_loop
-    async def on_caller_cancel(self, new_local_thread):
+    async def on_caller_cancel(self):
         self.call_in_progress = False
-        await new_local_thread.delete()
+        if self.thread is not None:
+            await self.thread.delete()
+        if self.local_thread is not None:
+            await self.local_thread.delete()
         await self.bot.get_channel(channel_for_system_ping_id).purge(limit=999)
         print("Done")
 
@@ -117,7 +128,7 @@ class Calls(commands.Cog):
     )
     async def decline_call(self, inter):
         if self.call_in_progress:
-            self.destination.remove(inter.author)  # TODO: Testing
+            self.destination.remove(inter.author)
             await inter.send(f"Звонок отклонен {inter.author.mention}", ephemeral=True)
         else:
             await inter.send("Звонка нет...")
@@ -160,6 +171,9 @@ class Calls(commands.Cog):
                 name="Вам звонят!",
                 auto_archive_duration=60,
             )
+
+            self.local_thread = new_local_thread
+
             await self.bot.get_channel(new_local_thread.id).send("init")
 
             self.caller.start(new_local_thread)
