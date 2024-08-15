@@ -1,7 +1,6 @@
 import disnake.errors
 from disnake.ext import commands, tasks
 from disnake import Member, VoiceState, Option, OptionType
-
 import config
 from config import channel_for_system_ping_id, channel_for_system_call_id
 
@@ -15,9 +14,7 @@ class ButtonsView(disnake.ui.View):
     async def decline_call_button(self, button, inter):
         if self.parent_.call_in_progress:
             self.parent_.destination.remove(inter.author)  # TODO: Testing
-            await inter.send(f"Звонок отклонен.", ephemeral=True)
-            self.parent_.count_decliners += 1
-            await self.bot.get_channel(channel_for_system_ping_id).purge(limit=1)
+            await inter.send(f"❌Звонок отклонен.", ephemeral=True)
         else:
             await inter.send("🤷🏻‍Звонка нет...", ephemeral=True)
 
@@ -48,7 +45,10 @@ class Calls(commands.Cog):
                 embed.add_field(name='', value='', inline=False)
                 embed.add_field(name='⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ЗВОНОК', value='', inline=False)
                 embed.add_field(name='', value=f"{member.mention} начал звонок!", inline=False)
-                embed.set_image(url=config.minerva_icon)
+                if member.avatar is None:
+                    embed.set_image(url=config.minerva_icon)
+                else:
+                    embed.set_image(url=member.avatar.url)
                 embed.set_footer(text='МИНЕРВА: Сигнал отправлен всем присутствующим.',
                                  icon_url=config.minerva_icon)
                 embed_id = await self.bot.get_channel(channel_for_system_ping_id).send(embed=embed,
@@ -59,6 +59,7 @@ class Calls(commands.Cog):
                     name="Общий звонок!",
                     auto_archive_duration=60,
                 )
+                await self.bot.get_channel(new_thread.id).send("init")
 
                 self.destination = []
                 for dst in member.guild.members:
@@ -103,8 +104,9 @@ class Calls(commands.Cog):
             self.caller.stop()
 
     @caller.after_loop
-    async def on_caller_cancel(self):
+    async def on_caller_cancel(self, new_local_thread):
         self.call_in_progress = False
+        await new_local_thread.delete()
         await self.bot.get_channel(channel_for_system_ping_id).purge(limit=999)
         print("Done")
 
@@ -144,7 +146,10 @@ class Calls(commands.Cog):
             embed.add_field(name='', value=f"```Сообщение инициализировано...```", inline=False)
             embed.add_field(name='⠀⠀⠀⠀⠀⠀⠀⠀⠀ЛИЧНЫЙ ЗВОНОК',
                             value=f"{member.mention}, вас вызывает {inter.author.mention}", inline=False)
-            embed.set_image(url=config.minerva_icon)
+            if member.avatar is None:
+                embed.set_image(url=config.minerva_icon)
+            else:
+                embed.set_image(url=member.avatar.url)
             embed.set_footer(text='МИНЕРВА: Сигнал отправлен.',
                              icon_url=config.minerva_icon)
             embed_id = await self.bot.get_channel(channel_for_system_ping_id).send(embed=embed,
@@ -155,9 +160,11 @@ class Calls(commands.Cog):
                 name="Вам звонят!",
                 auto_archive_duration=60,
             )
+            await self.bot.get_channel(new_local_thread.id).send("init")
+
             self.caller.start(new_local_thread)
         else:
-            await inter.send("Звонок уже идет...")
+            await inter.send("Звонок уже идет...", ephemeral=True)
 
 
 def setup(bot):
