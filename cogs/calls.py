@@ -3,7 +3,6 @@ from disnake.ext import commands, tasks
 from disnake import Member, VoiceState, Option, OptionType
 import config
 from config import channel_for_system_ping_id, channel_for_system_call_id
-import time
 
 
 class ButtonsView(disnake.ui.View):
@@ -27,13 +26,11 @@ class Calls(commands.Cog):
         self.call_in_progress = False
         self.count_decliners = 0
         self.thread = None
-        self.local_thread = None
-
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
         try:
-            if before.channel is not self.bot.get_channel(channel_for_system_ping_id) and len(
+            if before.channel is not self.bot.get_channel(channel_for_system_call_id) and len(
                     after.channel.members) - 1 == 0 and after.channel.id == channel_for_system_call_id:
 
                 embed = disnake.Embed(title='',
@@ -85,7 +82,6 @@ class Calls(commands.Cog):
 
     @tasks.loop(seconds=1.0, count=62)
     async def caller(self, new_thread):
-
         try:
             await self.bot.get_channel(new_thread.id).send(' '.join([i.mention for i in self.destination]))
             await self.bot.get_channel(new_thread.id).purge(limit=1)
@@ -98,27 +94,12 @@ class Calls(commands.Cog):
             self.caller.stop()
             await new_thread.delete()
 
-    async def personal_call(self, new_local_thread):
-        try:
-            await self.bot.get_channel(new_local_thread.id).send(' '.join([i.mention for i in self.destination]))
-            await self.bot.get_channel(new_local_thread.id).purge(limit=1)
-
-        except disnake.errors.HTTPException:
-            pass
-
-        if len(self.destination) == 0:
-            self.call_in_progress = False
-            self.caller.stop()
-            await new_local_thread.delete()
-
     @caller.after_loop
     async def on_caller_cancel(self):
         self.call_in_progress = False
         if self.thread is not None:
             await self.thread.delete()
-        if self.local_thread is not None:
-            await self.local_thread.delete()
-        await self.bot.get_channel(channel_for_system_ping_id).purge(limit=999)
+        await self.bot.get_channel(channel_for_system_ping_id).purge(limit=500)
         print("Done")
 
     @commands.slash_command(
@@ -172,7 +153,7 @@ class Calls(commands.Cog):
                 auto_archive_duration=60,
             )
 
-            self.local_thread = new_local_thread
+            self.thread = new_local_thread
 
             await self.bot.get_channel(new_local_thread.id).send("init")
 
