@@ -7,6 +7,7 @@ from disnake.ext import commands, tasks
 from config import devs
 import asyncio
 
+
 class VoiceStateCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,7 +16,6 @@ class VoiceStateCog(commands.Cog):
         with open(self.exceptions_file, "r") as f:
             data = json.load(f)
             self.exceptions = data.get("exceptions", [])
-
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
@@ -27,7 +27,6 @@ class VoiceStateCog(commands.Cog):
                 except:
                     pass
 
-
     @commands.slash_command(
         name="unmute_all",
         description="Размутить всех кроме исключений",
@@ -35,15 +34,13 @@ class VoiceStateCog(commands.Cog):
     )
     async def unmutе_all(self, inter, exceptions: disnake.Member = None):
         if inter.author.id in devs:
-            exceptions = [exceptions] if exceptions else []
             voice_channel = inter.author.voice.channel
-            exceptions.extend(self.exceptions)
             for member in voice_channel.members:
-                if member.id not in exceptions:
+                if member.id not in self.exceptions:
                     await member.edit(mute=False, deafen=False)
-                await inter.send("Команда успешно выполнена")
+                await inter.send("Команда успешно выполнена", ephemeral=True)
         else:
-            await inter.send("У вас нет прав для использования этой команды.")
+            await inter.send("У вас нет прав для использования этой команды.", ephemeral=True)
 
     @commands.slash_command(
         name="exception_add",
@@ -58,14 +55,15 @@ class VoiceStateCog(commands.Cog):
     )
     async def exception_add(self, inter, member: disnake.Member):
         if inter.author.id in devs:
-            if not member.id in self.exceptions:
+            if member.id in self.exceptions:
+                await inter.response.send_message(f"{member.mention} уже в списке.", ephemeral=True)
+            else:
                 self.exceptions.append(member.id)
                 self.save_exceptions(self.exceptions)
-                await inter.response.send_message(f"{member.mention} был добавлен.")
-            else:
-                await inter.response.send_message(f"{member.mention} уже в спике.")
+                await inter.response.send_message(f"{member.mention} был добавлен.", ephemeral=True)
         else:
-            await inter.send("У вас нет прав для использования этой команды.")
+            await inter.send("У вас нет прав для использования этой команды.", ephemeral=True)
+
     @commands.slash_command(
         name="exception_remove",
         description="Удалить исключение авторазмута",
@@ -82,15 +80,16 @@ class VoiceStateCog(commands.Cog):
             if member.id in self.exceptions:
                 self.exceptions.remove(member.id)
                 self.save_exceptions(self.exceptions)
-                await inter.response.send_message(f"{member.mention} был удалён.")
+                await inter.response.send_message(f"{member.mention} был удалён.", ephemeral=True)
             else:
-                await inter.response.send_message(f"{member.mention} ещё нет в списке.")
+                await inter.response.send_message(f"{member.mention} нет в списке.", ephemeral=True)
         else:
-            await inter.send("У вас нет прав для использования этой команды.")
+            await inter.send("У вас нет прав для использования этой команды.", ephemeral=True)
 
     def save_exceptions(self, exceptions):
         with open(self.exceptions_file, "w") as f:
             json.dump({"exceptions": exceptions}, f)
+
 
 def setup(bot):
     bot.add_cog(VoiceStateCog(bot))
